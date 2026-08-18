@@ -2322,13 +2322,21 @@
     moonMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 48), moonMat);
     moonGroup.add(moonMesh);
 
-    var moonLoader = new THREE.TextureLoader();
-    moonLoader.load(MOON_TEXTURE_URL, function (tex) {
-      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-      moonMat.uniforms.tex.value = tex;
-      moonMat.needsUpdate = true;
-      moonTexReady = true;
-    }, undefined, function () { /* silent fallback: stays on 2D disc */ });
+    /* Load texture via plain Image() — avoids Three.js TextureLoader's
+       crossOrigin attribute which breaks under file:// protocol. */
+    (function () {
+      var img = new Image();
+      img.onload = function () {
+        var tex = new THREE.Texture(img);
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.needsUpdate = true;
+        moonMat.uniforms.tex.value = tex;
+        moonMat.needsUpdate = true;
+        moonTexReady = true;
+      };
+      img.onerror = function () { /* silent fallback: stays on 2D disc */ };
+      img.src = MOON_TEXTURE_URL;
+    })();
 
     /* Outer aura billboard (breathing calm glow). Pushed well behind the
        sphere so it can't z-fight with the surface. */
@@ -2364,13 +2372,19 @@
     sunMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 48), sunMat);
     sunGroup.add(sunMesh);
 
-    var sunLoader = new THREE.TextureLoader();
-    sunLoader.load(SUN_TEXTURE_URL, function (tex) {
-      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-      sunMat.uniforms.tex.value = tex;
-      sunMat.needsUpdate = true;
-      sunTexReady = true;
-    }, undefined, function () { /* silent fallback: stays on 2D disc */ });
+    (function () {
+      var img = new Image();
+      img.onload = function () {
+        var tex = new THREE.Texture(img);
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.needsUpdate = true;
+        sunMat.uniforms.tex.value = tex;
+        sunMat.needsUpdate = true;
+        sunTexReady = true;
+      };
+      img.onerror = function () { /* silent fallback: stays on 2D disc */ };
+      img.src = SUN_TEXTURE_URL;
+    })();
 
     /* Corona flames sit slightly IN FRONT of the sphere so the tendrils
        can lick over the limb; additive + no depth test keeps it clean. */
